@@ -1,5 +1,6 @@
 import * as t from 'io-ts'
 import { NumberFromString } from './number/NumberFromString'
+import { either } from 'fp-ts/lib/Either'
 
 export interface IntFromStringC extends t.Type<t.Int, string, unknown> {}
 
@@ -19,6 +20,6 @@ export interface IntFromStringC extends t.Type<t.Int, string, unknown> {}
 export const IntFromString: IntFromStringC = new t.Type<t.Int, string, unknown>(
   'IntFromString',
   t.Int.is,
-  (u, c) => NumberFromString.validate(u, c).chain(n => (t.Int.is(n) ? t.success(n) : t.failure(u, c))),
+  (u, c) => either.chain(NumberFromString.validate(u, c), n => (t.Int.is(n) ? t.success(n) : t.failure(u, c))),
   NumberFromString.encode
 )

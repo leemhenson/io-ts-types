@@ -25,13 +25,17 @@ describe('optionFromJSON', () => {
     const T1 = optionFromJSON(t.number)
     assertSuccess(T1.decode(toJSON(none)), none)
     assertSuccess(T1.decode(toJSON(some(1))), some(1))
-    assertFailure(T1, toJSON(some('a')), ['Invalid value "a" supplied to : Option<number>/value: number'])
+    assertFailure(T1, toJSON(some('a')), [
+      'Invalid value "a" supplied to : Option<number>/1: Some<number>/value: number'
+    ])
     assertSuccess(T1.decode({ _tag: 'None', a: 'a' }), none)
     assertSuccess(T1.decode({ _tag: 'Some', value: 1, a: 'a' }), some(1))
 
     assertFailure(T1, null, ['Invalid value null supplied to : Option<number>'])
     assertFailure(T1, {}, ['Invalid value {} supplied to : Option<number>'])
-    assertFailure(T1, { _tag: 'Some', value: 'a' }, ['Invalid value "a" supplied to : Option<number>/value: number'])
+    assertFailure(T1, { _tag: 'Some', value: 'a' }, [
+      'Invalid value "a" supplied to : Option<number>/1: Some<number>/value: number'
+    ])
 
     const T2 = optionFromJSON(NumberFromString)
     assertSuccess(T2.decode(toJSON(none)), none)

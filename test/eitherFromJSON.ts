@@ -23,27 +23,27 @@ describe('eitherFromJSON', () => {
 
   it('decode', () => {
     const T1 = eitherFromJSON(t.string, t.number)
-    assertSuccess(T1.decode({ _tag: 'Left', value: 's' }), left<string, number>('s'))
-    assertSuccess(T1.decode({ _tag: 'Right', value: 1 }), right<string, number>(1))
+    assertSuccess(T1.decode({ _tag: 'Left', left: 's' }), left('s'))
+    assertSuccess(T1.decode({ _tag: 'Right', right: 1 }), right(1))
     assertFailure(T1, null, ['Invalid value null supplied to : Either<string, number>'])
     assertFailure(T1, {}, ['Invalid value {} supplied to : Either<string, number>'])
-    assertFailure(T1, { _tag: 'Left', value: true }, [
-      'Invalid value true supplied to : Either<string, number>/value: string'
+    assertFailure(T1, { _tag: 'Left', left: true }, [
+      'Invalid value true supplied to : Either<string, number>/0: Left<string>/left: string'
     ])
-    assertFailure(T1, { _tag: 'Right', value: 'a' }, [
-      'Invalid value "a" supplied to : Either<string, number>/value: number'
+    assertFailure(T1, { _tag: 'Right', right: 'a' }, [
+      'Invalid value "a" supplied to : Either<string, number>/1: Right<number>/right: number'
     ])
 
     const T2 = eitherFromJSON(t.string, NumberFromString)
-    assertSuccess(T2.decode({ _tag: 'Right', value: '1' }), right<string, number>(1))
+    assertSuccess(T2.decode({ _tag: 'Right', right: '1' }), right(1))
   })
 
   it('encode', () => {
     const T1 = eitherFromJSON(t.string, t.number)
-    assert.deepStrictEqual(T1.encode(left('a')), { _tag: 'Left', value: 'a' })
-    assert.deepStrictEqual(T1.encode(right(1)), { _tag: 'Right', value: 1 })
+    assert.deepStrictEqual(T1.encode(left('a')), { _tag: 'Left', left: 'a' })
+    assert.deepStrictEqual(T1.encode(right(1)), { _tag: 'Right', right: 1 })
 
     const T2 = eitherFromJSON(t.string, NumberFromString)
-    assert.deepStrictEqual(T2.encode(right(1)), { _tag: 'Right', value: '1' })
+    assert.deepStrictEqual(T2.encode(right(1)), { _tag: 'Right', right: '1' })
   })
 })

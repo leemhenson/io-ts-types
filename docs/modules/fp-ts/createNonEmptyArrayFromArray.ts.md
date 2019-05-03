@@ -57,8 +57,8 @@ export const createNonEmptyArrayFromArray = <C extends t.Mixed>(
 import * as t from 'io-ts'
 import { createNonEmptyArrayFromArray } from 'io-ts-types/lib/fp-ts/createNonEmptyArrayFromArray'
 import { right } from 'fp-ts/lib/Either'
-import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
+import { make } from 'fp-ts/lib/NonEmptyArray'
 
 const T = createNonEmptyArrayFromArray(t.number)
-assert.deepStrictEqual(T.decode([1, 2, 3]), right(new NonEmptyArray(1, [2, 3])))
+assert.deepStrictEqual(T.decode([1, 2, 3]), right(make(1, [2, 3])))
 ```

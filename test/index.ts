@@ -1,9 +1,8 @@
 import * as assert from 'assert'
-import { left, right } from 'fp-ts/lib/Either'
-import { NonEmptyArray } from 'fp-ts/lib/NonEmptyArray'
+import { left, right, isLeft, either } from 'fp-ts/lib/Either'
+import { make } from 'fp-ts/lib/NonEmptyArray'
 import { none, some } from 'fp-ts/lib/Option'
 import { ordNumber } from 'fp-ts/lib/Ord'
-import { StrMap } from 'fp-ts/lib/StrMap'
 import * as t from 'io-ts'
 import { PathReporter } from 'io-ts/lib/PathReporter'
 import { iso, Newtype } from 'newtype-ts'
@@ -15,7 +14,6 @@ import {
   createOptionFromJSON,
   createOptionFromNullable,
   createSetFromArray,
-  createStrMapFromDictionary,
   date,
   DateFromISOString,
   DateFromNumber,
@@ -133,15 +131,15 @@ describe('fp-ts', () => {
     const T = createNonEmptyArrayFromArray(t.number)
     assert.deepEqual(PathReporter.report(T.decode(null)), ['Invalid value null supplied to : NonEmptyArray<number>'])
     assert.deepEqual(PathReporter.report(T.decode([])), ['Invalid value [] supplied to : NonEmptyArray<number>'])
-    assert.deepEqual(T.decode([1]), right(new NonEmptyArray(1, [])))
-    assert.deepEqual(T.decode([1, 2, 3]), right(new NonEmptyArray(1, [2, 3])))
+    assert.deepEqual(T.decode([1]), right(make(1, [])))
+    assert.deepEqual(T.decode([1, 2, 3]), right(make(1, [2, 3])))
 
-    assert.deepEqual(T.encode(new NonEmptyArray(1, [2, 3])), [1, 2, 3])
-    assert.deepEqual(T.encode(new NonEmptyArray(1, [])), [1])
+    assert.deepEqual(T.encode(make(1, [2, 3])), [1, 2, 3])
+    assert.deepEqual(T.encode(make<number>(1, [])), [1])
 
-    assert.strictEqual(T.is(new NonEmptyArray(1, [2, 3])), true)
+    assert.strictEqual(T.is(make(1, [2, 3])), true)
     assert.strictEqual(T.is(null), false)
-    assert.strictEqual(T.is(new NonEmptyArray('a', ['b', 'c'])), false)
+    assert.strictEqual(T.is(make('a', ['b', 'c'])), false)
 
     const T2 = createNonEmptyArrayFromArray(t.number, 'T2')
     assert.strictEqual(T2.name, 'T2')
@@ -174,30 +172,12 @@ describe('fp-ts', () => {
     assert.strictEqual(T2.name, 'T2')
   })
 
-  it('createStrMapFromDictionary', () => {
-    const T = createStrMapFromDictionary(t.number)
-
-    assert.deepEqual(T.decode({}), right(new StrMap({})))
-    assert.deepEqual(T.decode({ foo: 42 }), right(new StrMap({ foo: 42 })))
-    assert.deepEqual(PathReporter.report(T.decode({ foo: 'not a number' })), [
-      'Invalid value "not a number" supplied to : StrMap<number>/foo: number'
-    ])
-    assert.deepEqual(T.encode(new StrMap({})), {})
-    assert.deepEqual(T.encode(new StrMap({ foo: 42 })), { foo: 42 })
-    assert.strictEqual(T.is(new StrMap({ foo: 42 })), true)
-    assert.strictEqual(T.is(new StrMap({ foo: 'not a number' })), false)
-    assert.strictEqual(T.is('not a strmap'), false)
-
-    const T2 = createStrMapFromDictionary(t.number, 'T2')
-    assert.strictEqual(T2.name, 'T2')
-  })
-
   it('fromNullable', () => {
     const T = fromNullable(t.number)(0)
     assert.deepEqual(T.decode(42), right(42))
     assert.deepEqual(T.decode(null), right(0))
     assert.deepEqual(T.decode(undefined), right(0))
-    assert.deepEqual(T.decode({}).isLeft(), true)
+    assert.deepEqual(isLeft(T.decode({})), true)
     const T2 = fromNullable(t.number)(0, 'T2')
     assert.strictEqual(T2.name, 'T2')
   })
@@ -208,13 +188,13 @@ describe('boolean', () => {
     const T = BooleanFromString
     assert.deepEqual(T.decode('true'), right(true))
     assert.deepEqual(T.decode('false'), right(false))
-    assert.deepEqual(T.decode('True').isLeft(), true)
-    assert.deepEqual(T.decode('False').isLeft(), true)
-    assert.deepEqual(T.decode('TRUE').isLeft(), true)
-    assert.deepEqual(T.decode('FALSE').isLeft(), true)
+    assert.deepEqual(isLeft(T.decode('True')), true)
+    assert.deepEqual(isLeft(T.decode('False')), true)
+    assert.deepEqual(isLeft(T.decode('TRUE')), true)
+    assert.deepEqual(isLeft(T.decode('FALSE')), true)
 
-    assert.deepEqual(T.decode(true).isLeft(), true)
-    assert.deepEqual(T.decode(false).isLeft(), true)
+    assert.deepEqual(isLeft(T.decode(true)), true)
+    assert.deepEqual(isLeft(T.decode(false)), true)
 
     assert.deepEqual(T.is(true), true)
     assert.deepEqual(T.is(false), true)
@@ -270,7 +250,7 @@ describe('Date', () => {
     const d = new Date(1973, 10, 30)
     const s = d.toISOString()
     assertSuccess(T.decode(s), d)
-    assertSuccess(T.decode(s).map(d => d.getTime()), d.getTime())
+    assertSuccess(either.map(T.decode(s), d => d.getTime()), d.getTime())
     assertFailure(T, null, ['Invalid value null supplied to : DateFromISOString'])
     assertFailure(T, 'foo', ['Invalid value "foo" supplied to : DateFromISOString'])
     assert.strictEqual(T.is(d), true)
@@ -283,7 +263,7 @@ describe('Date', () => {
     const d = new Date(1973, 10, 30)
     const millis = d.getTime()
     assert.deepEqual(T.decode(millis), right(d))
-    assert.deepEqual(T.decode(millis).map(d => d.getTime()), right(millis))
+    assert.deepEqual(either.map(T.decode(millis), d => d.getTime()), right(millis))
     assert.deepEqual(PathReporter.report(T.decode(NaN)), ['Invalid value NaN supplied to : DateFromNumber'])
     assert.deepEqual(PathReporter.report(T.decode('')), ['Invalid value "" supplied to : DateFromNumber'])
     assert.strictEqual(T.is(d), true)
@@ -297,7 +277,7 @@ describe('Date', () => {
     const d = new Date(1973, 10, 30)
     const seconds = getSeconds(d)
     assert.deepEqual(T.decode(seconds), right(d))
-    assert.deepEqual(T.decode(seconds).map(getSeconds), right(seconds))
+    assert.deepEqual(either.map(T.decode(seconds), getSeconds), right(seconds))
     assert.deepEqual(PathReporter.report(T.decode(NaN)), ['Invalid value NaN supplied to : DateFromUnixTime'])
     assert.deepEqual(PathReporter.report(T.decode('')), ['Invalid value "" supplied to : DateFromUnixTime'])
     assert.strictEqual(T.is(d), true)

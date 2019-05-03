@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { JSONType, JSONTypeRT } from './JSONTypeRT'
-import { tryCatch } from 'fp-ts/lib/Either'
+import { tryCatch, either, toError, fold } from 'fp-ts/lib/Either'
 
 export type JSONType = JSONType
 
@@ -10,16 +10,10 @@ export class JSONFromStringType extends t.Type<JSONType> {
     super(
       'JSONFromString',
       JSONTypeRT.is,
-      (m, c) => {
-        const validation = t.string.validate(m, c)
-        if (validation.isLeft()) {
-          return validation as any
-        } else {
-          const s = validation.value
-          // tslint:disable-next-line: deprecation
-          return tryCatch(() => JSON.parse(s)).fold(() => t.failure(s, c), t.success)
-        }
-      },
+      (m, c) =>
+        either.chain(t.string.validate(m, c), s =>
+          fold(tryCatch(() => JSON.parse(s), toError), () => t.failure(s, c), t.success)
+        ),
       JSON.stringify
     )
   }

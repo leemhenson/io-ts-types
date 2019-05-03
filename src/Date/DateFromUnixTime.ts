@@ -1,4 +1,5 @@
 import * as t from 'io-ts'
+import { either } from 'fp-ts/lib/Either'
 
 export class DateFromUnixTimeType extends t.Type<Date, number, unknown> {
   readonly _tag: 'DateFromUnixTimeType' = 'DateFromUnixTimeType'
@@ -8,12 +9,7 @@ export class DateFromUnixTimeType extends t.Type<Date, number, unknown> {
       (u): u is Date => u instanceof Date,
       (u, c) => {
         // tslint:disable-next-line: deprecation
-        const validation = t.Integer.validate(u, c)
-        if (validation.isLeft()) {
-          return validation as any
-        } else {
-          return t.success(new Date(validation.value * 1000))
-        }
+        return either.chain(t.Integer.validate(u, c), a => t.success(new Date(a * 1000)))
       },
       a => a.getTime() / 1000
     )

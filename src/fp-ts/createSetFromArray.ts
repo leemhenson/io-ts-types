@@ -1,6 +1,7 @@
 import * as t from 'io-ts'
 import { toArray, some, every } from 'fp-ts/lib/Set'
 import { Ord } from 'fp-ts/lib/Ord'
+import { either } from 'fp-ts/lib/Either'
 
 export class SetFromArrayType<C extends t.Any, A = any, O = A, I = unknown> extends t.Type<A, O, I> {
   readonly _tag: 'SetFromArrayType' = 'SetFromArrayType'
@@ -42,11 +43,7 @@ export const createSetFromArray = <C extends t.Mixed>(
     name,
     (m): m is Set<t.TypeOf<C>> => m instanceof Set && every(m, codec.is),
     (m, c) => {
-      const validation = ArrayType.validate(m, c)
-      if (validation.isLeft()) {
-        return validation as any
-      } else {
-        const as = validation.value
+      return either.chain(ArrayType.validate(m, c), as => {
         const len = as.length
         const r = new Set<t.TypeOf<C>>()
         for (let i = 0; i < len; i++) {
@@ -56,7 +53,7 @@ export const createSetFromArray = <C extends t.Mixed>(
           }
         }
         return r.size !== len ? t.failure(as, c) : t.success(r)
-      }
+      })
     },
     s => ArrayType.encode(setToArray(s)),
     codec,

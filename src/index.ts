@@ -14,7 +14,6 @@ export {
 export { createOptionFromJSON, OptionFromJSONC, OptionFromJSONType } from './fp-ts/createOptionFromJSON'
 export { createOptionFromNullable, OptionFromNullableC, OptionFromNullableType } from './fp-ts/createOptionFromNullable'
 export { createSetFromArray, SetFromArrayC, SetFromArrayType } from './fp-ts/createSetFromArray'
-export { createStrMapFromDictionary, StrMapC, StrMapType } from './fp-ts/createStrMapFromDictionary'
 export { fromNullable } from './fromNullable'
 
 // JSON

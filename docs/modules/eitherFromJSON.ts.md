@@ -9,7 +9,6 @@ parent: Modules
 <h2 class="text-delta">Table of contents</h2>
 
 - [EitherFromJSONC (interface)](#eitherfromjsonc-interface)
-- [JSONEither (type alias)](#jsoneither-type-alias)
 - [eitherFromJSON (function)](#eitherfromjson-function)
 
 ---
@@ -20,15 +19,7 @@ parent: Modules
 
 ```ts
 export interface EitherFromJSONC<L extends t.Mixed, R extends t.Mixed>
-  extends t.Type<Either<t.TypeOf<L>, t.TypeOf<R>>, JSONEither<t.OutputOf<L>, t.OutputOf<R>>, unknown> {}
-```
-
-# JSONEither (type alias)
-
-**Signature**
-
-```ts
-export type JSONEither<L, A> = { _tag: 'Left'; value: L } | { _tag: 'Right'; value: A }
+  extends t.Type<Either<t.TypeOf<L>, t.TypeOf<R>>, Either<t.OutputOf<L>, t.OutputOf<R>>, unknown> {}
 ```
 
 # eitherFromJSON (function)
@@ -61,7 +52,7 @@ const T = eitherFromJSON(t.string, t.number)
 assert.deepStrictEqual(T.decode(toJSON(right(1))), right(right(1)))
 assert.deepStrictEqual(T.decode(toJSON(left('a'))), right(left('a')))
 assert.deepStrictEqual(PathReporter.report(T.decode(right('a'))), [
-  'Invalid value "a" supplied to : Either<string, number>/value: number'
+  'Invalid value "a" supplied to : Either<string, number>/1: Right<number>/right: number'
 ])
 ```
 

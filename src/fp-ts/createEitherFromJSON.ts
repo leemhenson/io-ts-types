@@ -2,9 +2,18 @@
  * @file Use `io-ts-types/lib/eitherFromJSON` instead.
  * @deprecated
  */
+import { Either, either, fold, left, right } from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 
-import { Either, Right, Left, left, right } from 'fp-ts/lib/Either'
+const _Right = t.type({
+  _tag: t.literal('Right'),
+  right: t.unknown
+})
+
+const _Left = t.type({
+  _tag: t.literal('Left'),
+  left: t.unknown
+})
 
 export interface JSONLeft<L> {
   type: 'Left'
@@ -71,23 +80,22 @@ export const createEitherFromJSON = <L extends t.Mixed, R extends t.Mixed>(
   return new EitherFromJSONType(
     name,
     (m): m is Either<t.TypeOf<L>, t.TypeOf<R>> =>
-      (m instanceof Right && rightCodec.is(m.value)) || (m instanceof Left && leftCodec.is(m.value)),
-    (m, c) => {
-      const validation = JSONEither.validate(m, c)
-      if (validation.isLeft()) {
-        return validation as any
-      } else {
-        const e = validation.value
-        switch (e.type) {
-          case 'Left':
-            return t.success(left(e.value))
-          case 'Right':
-            return t.success(right(e.value))
+      (_Right.is(m) && rightCodec.is(m.right)) || (_Left.is(m) && leftCodec.is(m.left)),
+    (m, c) =>
+      either.chain(
+        JSONEither.validate(m, c),
+        (e): Either<t.TypeOf<L>, t.TypeOf<R>> => {
+          switch (e.type) {
+            case 'Left':
+              return t.success(left(e.value))
+            case 'Right':
+              return t.success(right(e.value))
+          }
         }
-      }
-    },
+      ),
     a =>
-      a.fold<JSONEither<t.OutputOf<L>, t.OutputOf<R>>>(
+      fold<t.TypeOf<L>, t.TypeOf<R>, JSONEither<t.OutputOf<L>, t.OutputOf<R>>>(
+        a,
         l => ({ type: 'Left', value: leftCodec.encode(l) }),
         a => ({ type: 'Right', value: rightCodec.encode(a) })
       ),

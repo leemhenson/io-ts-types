@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { withValidate } from './withValidate'
-import { left } from 'fp-ts/lib/Either'
+import { left, orElse } from 'fp-ts/lib/Either'
 
 /**
  * Returns a clone of the given codec that always succeed using the given value `a` if the original codec fails
@@ -22,7 +22,7 @@ export const fallback = <A, O, I>(codec: t.Type<A, O, I>) => (
   const isFallbackValid = codec.is(a)
   return withValidate(
     codec,
-    (u, c) => codec.validate(u, c).orElse(e => (isFallbackValid ? t.success(a) : left(e))),
+    (u, c) => orElse(codec.validate(u, c), e => (isFallbackValid ? t.success(a) : left(e))),
     name
   )
 }

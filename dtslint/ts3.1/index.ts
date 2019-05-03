@@ -4,8 +4,7 @@ import {
   createNonEmptyArrayFromArray,
   createOptionFromJSON,
   createOptionFromNullable,
-  createSetFromArray,
-  createStrMapFromDictionary
+  createSetFromArray
 } from '../../src'
 import { ordString } from 'fp-ts/lib/Ord'
 
@@ -73,16 +72,3 @@ const T10 = t.type({
 })
 type T10T1 = t.TypeOf<typeof T10>['a'] // $ExpectType Set<string>
 type T10T2 = t.OutputOf<typeof T10>['a'] // $ExpectType string[]
-
-//
-// createStrMapFromDictionary
-//
-
-const T11 = createStrMapFromDictionary(t.string)
-type T11T1 = t.TypeOf<typeof T11> // $ExpectType StrMap<string>
-type T11T2 = t.OutputOf<typeof T11> // $ExpectType Record<string, string>
-const T12 = t.type({
-  a: createStrMapFromDictionary(t.string)
-})
-type T12T1 = t.TypeOf<typeof T12>['a'] // $ExpectType StrMap<string>
-type T12T2 = t.OutputOf<typeof T12>['a'] // $ExpectType Record<string, string>

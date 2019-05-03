@@ -1,14 +1,15 @@
+import { Option } from 'fp-ts/lib/Option'
 import * as t from 'io-ts'
-import { Option, none, some, None, Some } from 'fp-ts/lib/Option'
 
-export type JSONOption<A> = { _tag: 'None' } | { _tag: 'Some'; value: A }
-
-const jnone: JSONOption<never> = { _tag: 'None' }
-
-const jsome = <A>(value: A): JSONOption<A> => ({ _tag: 'Some', value })
+const noneC = t.strict(
+  {
+    _tag: t.literal('None')
+  },
+  'None'
+)
 
 export interface OptionFromJSONC<C extends t.Mixed>
-  extends t.Type<Option<t.TypeOf<C>>, JSONOption<t.OutputOf<C>>, unknown> {}
+  extends t.Type<Option<t.TypeOf<C>>, Option<t.OutputOf<C>>, unknown> {}
 
 /**
  * Given a codec representing a type `A`, returns a codec representing `Option<A>` that is able to deserialize
@@ -27,7 +28,7 @@ export interface OptionFromJSONC<C extends t.Mixed>
  *
  * assert.deepStrictEqual(T.decode(toJSON(none)), right(none))
  * assert.deepStrictEqual(T.decode(toJSON(some(1))), right(some(1)))
- * assert.deepStrictEqual(PathReporter.report(T.decode(some('a'))), ['Invalid value "a" supplied to : Option<number>/value: number'])
+ * assert.deepStrictEqual(PathReporter.report(T.decode(some('a'))), ['Invalid value "a" supplied to : Option<number>/1: Some<number>/value: number'])
  *
  * @since 0.4.4
  */
@@ -35,22 +36,12 @@ export function optionFromJSON<C extends t.Mixed>(
   codec: C,
   name: string = `Option<${codec.name}>`
 ): OptionFromJSONC<C> {
-  const someC = t.type({
-    value: codec
-  })
-  return new t.Type(
-    name,
-    (u): u is Option<t.TypeOf<C>> => u instanceof None || (u instanceof Some && codec.is(u.value)),
-    (u, c) =>
-      t.UnknownRecord.validate(u, c).chain(o => {
-        if (o._tag === 'None') {
-          return t.success(none)
-        } else if (o._tag === 'Some') {
-          return someC.validate(o, c).map(s => some(s.value))
-        } else {
-          return t.failure(u, c)
-        }
-      }),
-    a => a.fold(jnone, a => jsome(codec.encode(a)))
+  const someC = t.strict(
+    {
+      _tag: t.literal('Some'),
+      value: codec
+    },
+    `Some<${codec.name}>`
   )
+  return t.taggedUnion('_tag', [noneC, someC], name)
 }

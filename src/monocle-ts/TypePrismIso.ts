@@ -1,6 +1,6 @@
 import { Prism } from 'monocle-ts'
 import * as t from 'io-ts'
-import { fromEither } from 'fp-ts/lib/Option'
+import { fromEither, fold } from 'fp-ts/lib/Option'
 
 /**
  * @example
@@ -34,5 +34,5 @@ export function get<A, O extends I, I>(codec: t.Type<A, O, I>): Prism<O, A> {
  * assert.deepStrictEqual(MyNumberFromString.decode('1'), right(1))
  */
 export function reverseGet<S, A>(name: string, prism: Prism<S, A>, is: t.Is<A>): t.Type<A, S, S> {
-  return new t.Type(name, is, (s, c) => prism.getOption(s).foldL(() => t.failure(s, c), t.success), prism.reverseGet)
+  return new t.Type(name, is, (s, c) => fold(prism.getOption(s), () => t.failure(s, c), t.success), prism.reverseGet)
 }

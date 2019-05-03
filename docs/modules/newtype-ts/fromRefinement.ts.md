@@ -1,6 +1,6 @@
 ---
 title: newtype-ts/fromRefinement.ts
-nav_order: 24
+nav_order: 23
 parent: Modules
 ---
 
@@ -28,7 +28,7 @@ export const fromRefinement: <S extends AnyNewtype = never>() => <O>(
 ) =>
   new Type(
     name,
-    (u): u is S => carrier.is(u) && prism.getOption(u).isSome(),
-    (u, c) => carrier.validate(u, c).chain(s => prism.getOption(s).foldL(() => failure(s, c), success)),
+    (u): u is S => carrier.is(u) && isSome(prism.getOption(u)),
+    (u, c) => either.chain(carrier.validate(u, c), s => fold(prism.getOption(s), () => failure(s, c), success)),
     a => ...
 ```

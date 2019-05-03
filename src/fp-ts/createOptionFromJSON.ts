@@ -2,9 +2,18 @@
  * @file Use `io-ts-types/lib/optionFromJSON` instead.
  * @deprecated
  */
+import { either } from 'fp-ts/lib/Either'
+import { fold, fromNullable, Option } from 'fp-ts/lib/Option'
 import * as t from 'io-ts'
 
-import { Option, None, Some, fromNullable } from 'fp-ts/lib/Option'
+const _None = t.type({
+  _tag: t.literal('None')
+})
+
+const _Some = t.type({
+  _tag: t.literal('Some'),
+  value: t.unknown
+})
 
 export interface JSONOption<A> {
   type: 'Option'
@@ -52,17 +61,11 @@ export const createOptionFromJSON = <C extends t.Mixed>(
   })
   return new OptionFromJSONType(
     name,
-    (m): m is Option<t.TypeOf<C>> => m instanceof None || (m instanceof Some && codec.is(m.value)),
-    (m, c) => {
-      const validation = JSONOption.validate(m, c)
-      if (validation.isLeft()) {
-        return validation as any
-      } else {
-        return t.success(fromNullable(validation.value.value))
-      }
-    },
+    (m): m is Option<t.TypeOf<C>> => _None.is(m) || (_Some.is(m) && codec.is(m.value)),
+    (m, c) => either.chain(JSONOption.validate(m, c), value => t.success(fromNullable(value.value))),
     a =>
-      a.foldL<JSONOption<t.OutputOf<C>>>(
+      fold<t.TypeOf<C>, JSONOption<t.OutputOf<C>>>(
+        a,
         () => ({ type: 'Option', value: null }),
         value => ({ type: 'Option', value: codec.encode(value) })
       ),

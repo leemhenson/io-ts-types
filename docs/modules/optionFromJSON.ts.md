@@ -1,6 +1,6 @@
 ---
 title: optionFromJSON.ts
-nav_order: 27
+nav_order: 26
 parent: Modules
 ---
 
@@ -9,7 +9,6 @@ parent: Modules
 <h2 class="text-delta">Table of contents</h2>
 
 - [OptionFromJSONC (interface)](#optionfromjsonc-interface)
-- [JSONOption (type alias)](#jsonoption-type-alias)
 - [optionFromJSON (function)](#optionfromjson-function)
 
 ---
@@ -20,15 +19,7 @@ parent: Modules
 
 ```ts
 export interface OptionFromJSONC<C extends t.Mixed>
-  extends t.Type<Option<t.TypeOf<C>>, JSONOption<t.OutputOf<C>>, unknown> {}
-```
-
-# JSONOption (type alias)
-
-**Signature**
-
-```ts
-export type JSONOption<A> = { _tag: 'None' } | { _tag: 'Some'; value: A }
+  extends t.Type<Option<t.TypeOf<C>>, Option<t.OutputOf<C>>, unknown> {}
 ```
 
 # optionFromJSON (function)
@@ -61,7 +52,7 @@ const T = optionFromJSON(t.number)
 assert.deepStrictEqual(T.decode(toJSON(none)), right(none))
 assert.deepStrictEqual(T.decode(toJSON(some(1))), right(some(1)))
 assert.deepStrictEqual(PathReporter.report(T.decode(some('a'))), [
-  'Invalid value "a" supplied to : Option<number>/value: number'
+  'Invalid value "a" supplied to : Option<number>/1: Some<number>/value: number'
 ])
 ```
 

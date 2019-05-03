@@ -1,4 +1,5 @@
 import * as t from 'io-ts'
+import { either } from 'fp-ts/lib/Either'
 
 export class DateFromNumberType extends t.Type<Date, number, unknown> {
   readonly _tag: 'DateFromNumberType' = 'DateFromNumberType'
@@ -6,16 +7,11 @@ export class DateFromNumberType extends t.Type<Date, number, unknown> {
     super(
       'DateFromNumber',
       (u): u is Date => u instanceof Date,
-      (u, c) => {
-        const validation = t.number.validate(u, c)
-        if (validation.isLeft()) {
-          return validation as any
-        } else {
-          const n = validation.value
+      (u, c) =>
+        either.chain(t.number.validate(u, c), n => {
           const d = new Date(n)
           return isNaN(d.getTime()) ? t.failure(n, c) : t.success(d)
-        }
-      },
+        }),
       a => a.getTime()
     )
   }

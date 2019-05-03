@@ -1,5 +1,15 @@
+import { either } from 'fp-ts/lib/Either'
+import { fromNullable, Option, option, toNullable } from 'fp-ts/lib/Option'
 import * as t from 'io-ts'
-import { Option, Some, None, fromNullable } from 'fp-ts/lib/Option'
+
+const _None = t.type({
+  _tag: t.literal('None')
+})
+
+const _Some = t.type({
+  _tag: t.literal('Some'),
+  value: t.unknown
+})
 
 export class OptionFromNullableType<C extends t.Any, A = any, O = A, I = unknown> extends t.Type<A, O, I> {
   readonly _tag: 'OptionFromNullableType' = 'OptionFromNullableType'
@@ -36,12 +46,9 @@ export const createOptionFromNullable = <C extends t.Mixed>(
   const Nullable = t.union([codec, t.null, t.undefined])
   return new OptionFromNullableType(
     name,
-    (m): m is Option<t.TypeOf<C>> => m instanceof None || (m instanceof Some && codec.is(m.value)),
-    (s, c) => {
-      const validation = Nullable.validate(s, c)
-      return validation.isLeft() ? (validation as any) : t.success(fromNullable(validation.value))
-    },
-    a => a.map(codec.encode).toNullable(),
+    (m): m is Option<t.TypeOf<C>> => _None.is(m) || (_Some.is(m) && codec.is(m.value)),
+    (s, c) => either.chain(Nullable.validate(s, c), value => t.success(fromNullable(value))),
+    a => toNullable(option.map(a, codec.encode)),
     codec
   )
 }
