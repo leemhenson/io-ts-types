@@ -22,7 +22,7 @@ export const fallback = <A, O, I>(codec: t.Type<A, O, I>) => (
   const isFallbackValid = codec.is(a)
   return withValidate(
     codec,
-    (u, c) => orElse(codec.validate(u, c), e => (isFallbackValid ? t.success(a) : left(e))),
+    (u, c) => orElse((e: t.Errors) => (isFallbackValid ? t.success(a) : left(e)))(codec.validate(u, c)),
     name
   )
 }

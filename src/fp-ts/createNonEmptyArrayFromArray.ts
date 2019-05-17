@@ -1,6 +1,6 @@
 import * as t from 'io-ts'
 import { NonEmptyArray, fromArray } from 'fp-ts/lib/NonEmptyArray'
-import { either } from 'fp-ts/lib/Either'
+import { either, Either } from 'fp-ts/lib/Either'
 import { fold } from 'fp-ts/lib/Option'
 
 export class NonEmptyArrayFromArrayType<C extends t.Any, A = any, O = A, I = unknown> extends t.Type<A, O, I> {
@@ -37,7 +37,13 @@ export const createNonEmptyArrayFromArray = <C extends t.Mixed>(
   return new NonEmptyArrayFromArrayType(
     name,
     (m): m is NonEmptyArray<t.TypeOf<C>> => ArrayType.is(m) && m.length > 0,
-    (m, c) => either.chain(ArrayType.validate(m, c), as => fold(fromArray(as), () => t.failure(as, c), t.success)),
+    (m, c) =>
+      either.chain(ArrayType.validate(m, c), as =>
+        fold<NonEmptyArray<t.TypeOf<C>>, Either<t.Errors, NonEmptyArray<t.TypeOf<C>>>>(
+          () => t.failure(as, c),
+          t.success
+        )(fromArray(as))
+      ),
     a => ArrayType.encode(a),
     codec
   )

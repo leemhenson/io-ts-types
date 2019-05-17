@@ -95,10 +95,9 @@ export const createEitherFromJSON = <L extends t.Mixed, R extends t.Mixed>(
       ),
     a =>
       fold<t.TypeOf<L>, t.TypeOf<R>, JSONEither<t.OutputOf<L>, t.OutputOf<R>>>(
-        a,
         l => ({ type: 'Left', value: leftCodec.encode(l) }),
         a => ({ type: 'Right', value: rightCodec.encode(a) })
-      ),
+      )(a),
     leftCodec,
     rightCodec
   )

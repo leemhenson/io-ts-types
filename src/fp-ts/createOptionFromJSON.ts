@@ -65,10 +65,9 @@ export const createOptionFromJSON = <C extends t.Mixed>(
     (m, c) => either.chain(JSONOption.validate(m, c), value => t.success(fromNullable(value.value))),
     a =>
       fold<t.TypeOf<C>, JSONOption<t.OutputOf<C>>>(
-        a,
         () => ({ type: 'Option', value: null }),
         value => ({ type: 'Option', value: codec.encode(value) })
-      ),
+      )(a),
     codec
   )
 }
