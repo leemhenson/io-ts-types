@@ -1,6 +1,6 @@
 import * as assert from 'assert'
 import { left, right, isLeft, either } from 'fp-ts/lib/Either'
-import { make } from 'fp-ts/lib/NonEmptyArray'
+import { cons } from 'fp-ts/lib/NonEmptyArray'
 import { none, some } from 'fp-ts/lib/Option'
 import { ordNumber } from 'fp-ts/lib/Ord'
 import * as t from 'io-ts'
@@ -131,15 +131,15 @@ describe('fp-ts', () => {
     const T = createNonEmptyArrayFromArray(t.number)
     assert.deepEqual(PathReporter.report(T.decode(null)), ['Invalid value null supplied to : NonEmptyArray<number>'])
     assert.deepEqual(PathReporter.report(T.decode([])), ['Invalid value [] supplied to : NonEmptyArray<number>'])
-    assert.deepEqual(T.decode([1]), right(make(1, [])))
-    assert.deepEqual(T.decode([1, 2, 3]), right(make(1, [2, 3])))
+    assert.deepEqual(T.decode([1]), right(cons(1, [])))
+    assert.deepEqual(T.decode([1, 2, 3]), right(cons(1, [2, 3])))
 
-    assert.deepEqual(T.encode(make(1, [2, 3])), [1, 2, 3])
-    assert.deepEqual(T.encode(make<number>(1, [])), [1])
+    assert.deepEqual(T.encode(cons(1, [2, 3])), [1, 2, 3])
+    assert.deepEqual(T.encode(cons(1, [])), [1])
 
-    assert.strictEqual(T.is(make(1, [2, 3])), true)
+    assert.strictEqual(T.is(cons(1, [2, 3])), true)
     assert.strictEqual(T.is(null), false)
-    assert.strictEqual(T.is(make('a', ['b', 'c'])), false)
+    assert.strictEqual(T.is(cons('a', ['b', 'c'])), false)
 
     const T2 = createNonEmptyArrayFromArray(t.number, 'T2')
     assert.strictEqual(T2.name, 'T2')
