@@ -13,8 +13,8 @@ export const fromRefinement: <S extends AnyNewtype = never>() => <O>(
   carrier: Type<CarrierOf<S>, O, unknown>,
   prism: Prism<CarrierOf<S>, S>,
   name: string = `Refinement<${carrier.name}>`
-) =>
-  new Type(
+) => {
+  return new Type(
     name,
     (u): u is S => carrier.is(u) && isSome(prism.getOption(u)),
     (u, c) =>
@@ -26,3 +26,4 @@ export const fromRefinement: <S extends AnyNewtype = never>() => <O>(
       ),
     a => carrier.encode(a)
   )
+}

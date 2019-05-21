@@ -60,5 +60,5 @@ import { right } from 'fp-ts/lib/Either'
 import { make } from 'fp-ts/lib/NonEmptyArray'
 
 const T = createNonEmptyArrayFromArray(t.number)
-assert.deepStrictEqual(T.decode([1, 2, 3]), right(make(1, [2, 3])))
+assert.deepStrictEqual(T.decode([1, 2, 3]), right(make([1, 2, 3])))
 ```

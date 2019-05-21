@@ -15,6 +15,6 @@ export interface NonEmptyArrayFromArrayC<C extends t.Mixed> extends NonEmptyArra
  * import { make } from 'fp-ts/lib/NonEmptyArray'
  *
  * const T = createNonEmptyArrayFromArray(t.number)
- * assert.deepStrictEqual(T.decode([1, 2, 3]), right(make(1, [2, 3])))
+ * assert.deepStrictEqual(T.decode([1, 2, 3]), right(make([1, 2, 3])))
  */
 export declare const createNonEmptyArrayFromArray: <C extends t.Mixed>(codec: C, name?: string) => NonEmptyArrayFromArrayC<C>;
