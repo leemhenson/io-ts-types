@@ -41,14 +41,14 @@ export const createSetFromArray = <C extends t.Mixed>(
   const setToArray = toArray(ordA)
   return new SetFromArrayType(
     name,
-    (m): m is Set<t.TypeOf<C>> => m instanceof Set && every(m, codec.is),
+    (m): m is Set<t.TypeOf<C>> => m instanceof Set && every(codec.is)(m),
     (m, c) => {
       return either.chain(ArrayType.validate(m, c), as => {
         const len = as.length
         const r = new Set<t.TypeOf<C>>()
         for (let i = 0; i < len; i++) {
           const a = as[i]
-          if (!some(r, x => equals(x, a))) {
+          if (!some(x => equals(x, a))(r)) {
             r.add(a)
           }
         }

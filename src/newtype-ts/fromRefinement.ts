@@ -1,9 +1,9 @@
-import { AnyNewtype, CarrierOf } from 'newtype-ts'
-import { Prism } from 'monocle-ts'
-import { Type, success, failure } from 'io-ts'
 import { either } from 'fp-ts/lib/Either'
-import { isSome, fold } from 'fp-ts/lib/Option'
-import { pipeOp as pipe } from 'fp-ts/lib/function'
+import { pipeOp } from 'fp-ts/lib/function'
+import { fold, isSome } from 'fp-ts/lib/Option'
+import { failure, success, Type } from 'io-ts'
+import { Prism } from 'monocle-ts'
+import { AnyNewtype, CarrierOf } from 'newtype-ts'
 
 export const fromRefinement: <S extends AnyNewtype = never>() => <O>(
   carrier: Type<CarrierOf<S>, O, unknown>,
@@ -17,13 +17,7 @@ export const fromRefinement: <S extends AnyNewtype = never>() => <O>(
   return new Type(
     name,
     (u): u is S => carrier.is(u) && isSome(prism.getOption(u)),
-    (u, c) =>
-      either.chain(carrier.validate(u, c), s =>
-        pipe(
-          prism.getOption(s),
-          fold(() => failure(s, c), success)
-        )
-      ),
+    (u, c) => either.chain(carrier.validate(u, c), s => pipeOp(prism.getOption(s), fold(() => failure(s, c), success))),
     a => carrier.encode(a)
   )
 }

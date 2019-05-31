@@ -1,6 +1,6 @@
 {
   "name": "io-ts-types",
-  "version": "0.5.0-rc.1",
+  "version": "0.5.0-rc.2",
   "description": "A collection of runtime types and combinators for use with io-ts",
   "files": [
     "lib"
@@ -40,7 +40,7 @@
     "@types/node": "7.0.4",
     "docs-ts": "0.0.1",
     "dtslint": "github:gcanti/dtslint",
-    "fp-ts": "^2.0.0-rc.1",
+    "fp-ts": "^2.0.0-rc.2",
     "io-ts": "github:gcanti/io-ts#fp-ts-v2",
     "jest": "^23.6.0",
     "mocha": "^5.2.0",
